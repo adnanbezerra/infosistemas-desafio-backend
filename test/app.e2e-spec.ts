@@ -8,11 +8,15 @@ import { Reflector } from '@nestjs/core';
 import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
 import { App } from 'supertest/types';
-import { AuthController } from '../src/auth/auth.controller';
-import { AuthService } from '../src/auth/auth.service';
-import { IS_PUBLIC_KEY } from '../src/auth/public.decorator';
-import { VehiclesController } from '../src/vehicles/vehicles.controller';
-import { VehiclesService } from '../src/vehicles/vehicles.service';
+import { LoginCommand } from '../src/modules/auth/commands/login.command';
+import { AuthController } from '../src/modules/auth/controllers/auth.controller';
+import { AuthService } from '../src/modules/auth/services/auth.service';
+import { IS_PUBLIC_KEY } from '../src/modules/auth/decorators/public.decorator';
+import { CreateVehicleCommand } from '../src/modules/vehicles/commands/create-vehicle.command';
+import { DeleteVehicleCommand } from '../src/modules/vehicles/commands/delete-vehicle.command';
+import { UpdateVehicleCommand } from '../src/modules/vehicles/commands/update-vehicle.command';
+import { VehiclesController } from '../src/modules/vehicles/controllers/vehicles.controller';
+import { VehiclesService } from '../src/modules/vehicles/services/vehicles.service';
 
 describe('API routes (e2e)', () => {
     let app: INestApplication<App>;
@@ -39,6 +43,10 @@ describe('API routes (e2e)', () => {
             controllers: [AuthController, VehiclesController],
             providers: [
                 Reflector,
+                LoginCommand,
+                CreateVehicleCommand,
+                UpdateVehicleCommand,
+                DeleteVehicleCommand,
                 { provide: AuthService, useValue: authService },
                 { provide: VehiclesService, useValue: vehiclesService },
             ],

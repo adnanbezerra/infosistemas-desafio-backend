@@ -3,10 +3,10 @@ import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import * as bcrypt from 'bcrypt';
 import dataSource from '../data-source';
-import { Brand } from '../../brands/brand.entity';
-import { Model } from '../../models/model.entity';
-import { User } from '../../users/user.entity';
-import { Vehicle } from '../../vehicles/vehicle.entity';
+import { Brand } from '../../modules/brands/entities/brand.entity';
+import { Model } from '../../modules/models/entities/model.entity';
+import { User } from '../../modules/users/entities/user.entity';
+import { Vehicle } from '../../modules/vehicles/entities/vehicle.entity';
 
 type SeedVehicle = {
     licensePlate: string;
