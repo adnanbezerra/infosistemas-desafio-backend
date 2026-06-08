@@ -1,7 +1,9 @@
 import { Module } from '@nestjs/common';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { MongooseModule } from '@nestjs/mongoose';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { AuditModule } from './audit/audit.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 import { validateEnv } from './config/validate-env';
@@ -25,6 +27,13 @@ import { VehiclesModule } from './modules/vehicles/vehicles.module';
             inject: [ConfigService],
             useFactory: createTypeOrmOptions,
         }),
+        MongooseModule.forRootAsync({
+            inject: [ConfigService],
+            useFactory: (configService: ConfigService) => ({
+                uri: configService.getOrThrow<string>('MONGODB_URI'),
+            }),
+        }),
+        AuditModule,
         RedisModule,
         AuthModule,
         HealthModule,
