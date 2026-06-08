@@ -203,6 +203,114 @@ describe('VehiclesService', () => {
             ),
         ).rejects.toBeInstanceOf(ConflictException);
     });
+
+    it('throws 409 for duplicate chassis', async () => {
+        modelsRepository.exists.mockResolvedValue(true);
+        vehiclesRepository.createQueryBuilder
+            .mockReturnValueOnce(createQueryBuilderMock({ exists: false }))
+            .mockReturnValueOnce(createQueryBuilderMock({ exists: true }));
+
+        await expect(
+            service.create(
+                {
+                    license_plate: 'ABC1D23',
+                    chassis: 'CHASSIS123',
+                    renavam: '123456789',
+                    year: 2024,
+                    model_id: modelId,
+                },
+                userId,
+            ),
+        ).rejects.toBeInstanceOf(ConflictException);
+    });
+
+    it('throws 409 for duplicate renavam', async () => {
+        modelsRepository.exists.mockResolvedValue(true);
+        vehiclesRepository.createQueryBuilder
+            .mockReturnValueOnce(createQueryBuilderMock({ exists: false }))
+            .mockReturnValueOnce(createQueryBuilderMock({ exists: false }))
+            .mockReturnValueOnce(createQueryBuilderMock({ exists: true }));
+
+        await expect(
+            service.create(
+                {
+                    license_plate: 'ABC1D23',
+                    chassis: 'CHASSIS123',
+                    renavam: '123456789',
+                    year: 2024,
+                    model_id: modelId,
+                },
+                userId,
+            ),
+        ).rejects.toBeInstanceOf(ConflictException);
+    });
+
+    it('lists vehicles from database when cache misses', async () => {
+        const vehicle = createVehicle();
+        const queryBuilder = createQueryBuilderMock({
+            manyAndCount: [[vehicle], 1],
+        });
+
+        redisService.get.mockResolvedValue(null);
+        vehiclesRepository.createQueryBuilder.mockReturnValue(queryBuilder);
+
+        await expect(service.findAll({})).resolves.toEqual({
+            data: [vehicle],
+            meta: { page: 1, limit: 10, total: 1, totalPages: 1 },
+        });
+        expect(redisService.set).toHaveBeenCalledWith(
+            'vehicles:list:{"brand_id":null,"limit":10,"model_id":null,"page":1,"search":null,"year":null}',
+            {
+                data: [vehicle],
+                meta: { page: 1, limit: 10, total: 1, totalPages: 1 },
+            },
+        );
+    });
+
+    it('finds vehicle by id and caches it', async () => {
+        const vehicle = createVehicle();
+
+        redisService.get.mockResolvedValue(null);
+        vehiclesRepository.findOne.mockResolvedValue(vehicle);
+
+        await expect(service.findOne(vehicleId)).resolves.toEqual(vehicle);
+        expect(vehiclesRepository.findOne).toHaveBeenCalledWith({
+            where: { id: vehicleId },
+            relations: { model: { brand: true } },
+        });
+        expect(redisService.set).toHaveBeenCalledWith(
+            `vehicles:${vehicleId}`,
+            vehicle,
+        );
+    });
+
+    it('invalidates cache when updating vehicle', async () => {
+        const vehicle = createVehicle();
+        const updated = createVehicle({ year: 2025 });
+
+        redisService.get.mockResolvedValue(null);
+        vehiclesRepository.findOne.mockResolvedValue(vehicle);
+        vehiclesRepository.createQueryBuilder.mockReturnValue(
+            createQueryBuilderMock({ exists: false }),
+        );
+        vehiclesRepository.save.mockResolvedValue(updated);
+
+        await expect(
+            service.update(vehicleId, { year: 2025 }),
+        ).resolves.toEqual(updated);
+        expect(redisService.delByPattern).toHaveBeenCalledWith('vehicles:*');
+    });
+
+    it('invalidates cache when removing vehicle', async () => {
+        const vehicle = createVehicle();
+
+        redisService.get.mockResolvedValue(null);
+        vehiclesRepository.findOne.mockResolvedValue(vehicle);
+
+        await expect(service.remove(vehicleId)).resolves.toBeUndefined();
+        expect(vehiclesRepository.remove).toHaveBeenCalledWith(vehicle);
+        expect(redisService.delByPattern).toHaveBeenCalledWith('vehicles:*');
+    });
 });
 
 function createVehicle(overrides: Partial<Vehicle> = {}): Vehicle {
