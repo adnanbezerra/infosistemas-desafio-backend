@@ -9,13 +9,8 @@ const userId = '22222222-2222-4222-8222-222222222222';
 
 describe('BrandsService', () => {
     let service: BrandsService;
-    let brandsRepository: jest.Mocked<
-        Pick<
-            Repository<Brand>,
-            'create' | 'createQueryBuilder' | 'findOne' | 'remove' | 'save'
-        >
-    >;
-    let modelsRepository: jest.Mocked<Pick<Repository<Model>, 'count'>>;
+    let brandsRepository: RepositoryMock<Brand>;
+    let modelsRepository: CountRepositoryMock;
 
     beforeEach(() => {
         brandsRepository = {
@@ -30,8 +25,8 @@ describe('BrandsService', () => {
         };
 
         service = new BrandsService(
-            brandsRepository as Repository<Brand>,
-            modelsRepository as Repository<Model>,
+            brandsRepository as unknown as Repository<Brand>,
+            modelsRepository as unknown as Repository<Model>,
         );
     });
 
@@ -99,3 +94,15 @@ function createQueryBuilderMock(exists: boolean) {
         where: jest.fn().mockReturnThis(),
     } as never;
 }
+
+type RepositoryMock<T> = {
+    create: jest.Mock<T, [Partial<T>]>;
+    createQueryBuilder: jest.Mock;
+    findOne: jest.Mock;
+    remove: jest.Mock;
+    save: jest.Mock;
+};
+
+type CountRepositoryMock = {
+    count: jest.Mock;
+};

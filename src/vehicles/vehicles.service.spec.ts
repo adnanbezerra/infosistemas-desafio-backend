@@ -16,16 +16,9 @@ const userId = '44444444-4444-4444-8444-444444444444';
 
 describe('VehiclesService', () => {
     let service: VehiclesService;
-    let vehiclesRepository: jest.Mocked<
-        Pick<
-            Repository<Vehicle>,
-            'create' | 'createQueryBuilder' | 'findOne' | 'remove' | 'save'
-        >
-    >;
-    let modelsRepository: jest.Mocked<Pick<Repository<Model>, 'exists'>>;
-    let redisService: jest.Mocked<
-        Pick<RedisService, 'delByPattern' | 'get' | 'set'>
-    >;
+    let vehiclesRepository: RepositoryMock<Vehicle>;
+    let modelsRepository: ExistsRepositoryMock;
+    let redisService: RedisServiceMock;
 
     beforeEach(() => {
         vehiclesRepository = {
@@ -45,9 +38,9 @@ describe('VehiclesService', () => {
         };
 
         service = new VehiclesService(
-            vehiclesRepository as Repository<Vehicle>,
-            modelsRepository as Repository<Model>,
-            redisService as RedisService,
+            vehiclesRepository as unknown as Repository<Vehicle>,
+            modelsRepository as unknown as Repository<Model>,
+            redisService as unknown as RedisService,
         );
     });
 
@@ -343,3 +336,21 @@ function createQueryBuilderMock({
         where: jest.fn().mockReturnThis(),
     } as never;
 }
+
+type RepositoryMock<T> = {
+    create: jest.Mock<T, [Partial<T>]>;
+    createQueryBuilder: jest.Mock;
+    findOne: jest.Mock;
+    remove: jest.Mock;
+    save: jest.Mock;
+};
+
+type ExistsRepositoryMock = {
+    exists: jest.Mock;
+};
+
+type RedisServiceMock = {
+    delByPattern: jest.Mock;
+    get: jest.Mock;
+    set: jest.Mock;
+};
