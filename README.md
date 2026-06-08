@@ -1,6 +1,6 @@
 # Desafio Backend Aivacol
 
-API NestJS para gerenciamento de frota com marcas, modelos, veiculos, usuario administrador, SQL Server, Redis e TypeORM.
+API NestJS para gerenciamento de frota com marcas, modelos, veiculos, usuario administrador, SQL Server, Redis, RabbitMQ, MongoDB, TypeORM e Mongoose.
 
 ## Tecnologias
 
@@ -10,6 +10,8 @@ API NestJS para gerenciamento de frota com marcas, modelos, veiculos, usuario ad
 - TypeORM
 - SQL Server
 - Redis
+- RabbitMQ
+- MongoDB
 - Docker Compose
 - Jest
 
@@ -43,16 +45,19 @@ JWT_EXPIRES_IN=1d
 REDIS_HOST=localhost
 REDIS_PORT=6379
 REDIS_TTL_SECONDS=60
+RABBITMQ_URL=amqp://localhost:5672
+RABBITMQ_EXCHANGE=aivacol.events
+MONGODB_URI=mongodb://localhost:27017/aivacol_audit
 DEFAULT_ADMIN_NICKNAME=aivacol
 DEFAULT_ADMIN_PASSWORD=aivacol123
 ```
 
 ## Docker Compose
 
-Subir SQL Server, criar database local e subir Redis:
+Subir SQL Server, criar database local, Redis, RabbitMQ e MongoDB:
 
 ```bash
-docker compose up -d mssql mssql-init redis
+docker compose up -d mssql mssql-init redis rabbitmq mongodb
 ```
 
 Subir tambem a API pelo Compose:
@@ -66,6 +71,9 @@ Servicos expostos:
 - API: `http://localhost:3000`
 - SQL Server: `localhost:1433`
 - Redis: `localhost:6379`
+- RabbitMQ: `localhost:5672`
+- RabbitMQ Management: `http://localhost:15672`
+- MongoDB: `localhost:27017`
 
 O servico `mssql-init` aguarda SQL Server aceitar conexao e cria o database `aivacol_fleet` se ele ainda nao existir.
 
@@ -218,6 +226,19 @@ curl -X DELETE http://localhost:3000/vehicles/vehicle-uuid \
 ## Cache Redis
 
 A listagem e consulta por id de veiculos usam Redis real. Escritas em veiculos invalidam as chaves `vehicles:*` para evitar resposta antiga apos criar, atualizar ou remover registros.
+
+## Mensageria RabbitMQ
+
+O servico publica eventos no exchange topic configurado em `RABBITMQ_EXCHANGE`:
+
+- `auth.login`: login realizado com sucesso.
+- `vehicles.find_all`: consulta `GET /vehicles` realizada.
+
+Falha ao publicar evento nao derruba a requisicao HTTP; o erro fica registrado no logger da aplicacao.
+
+## Auditoria MongoDB
+
+Todas as interacoes HTTP sao registradas na collection `audit_logs`, usando schema Mongoose para padronizar campos basicos: metodo, rota, status, duracao, IP, usuario autenticado, body sanitizado e query string.
 
 O TTL local e definido por:
 
