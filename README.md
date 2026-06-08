@@ -16,7 +16,7 @@ API NestJS para gerenciamento de frota com marcas, modelos, veiculos, usuario ad
 ## Pre-requisitos
 
 - Node.js 22+
-- pnpm
+- npm
 - Docker e Docker Compose
 
 ## Configuracao
@@ -47,8 +47,6 @@ DEFAULT_ADMIN_NICKNAME=aivacol
 DEFAULT_ADMIN_PASSWORD=aivacol123
 ```
 
-Nao use `DB_SYNCHRONIZE=true`. O schema deve ser criado por migrations.
-
 ## Docker Compose
 
 Subir SQL Server, criar database local e subir Redis:
@@ -74,7 +72,7 @@ O servico `mssql-init` aguarda SQL Server aceitar conexao e cria o database `aiv
 ## Instalacao
 
 ```bash
-pnpm install
+npm install
 ```
 
 ## Migrations
@@ -82,27 +80,25 @@ pnpm install
 Gerar migration a partir das entities:
 
 ```bash
-pnpm run migration:generate src/database/migrations/NomeDaMigration
+npm run migration:generate src/database/migrations/NomeDaMigration
 ```
 
 Executar migrations:
 
 ```bash
-pnpm run migration:run
+npm run migration:run
 ```
 
 Reverter ultima migration:
 
 ```bash
-pnpm run migration:revert
+npm run migration:revert
 ```
-
-Migrations nao devem ser escritas manualmente.
 
 ## Seed
 
 ```bash
-pnpm run seed
+npm run seed
 ```
 
 O seed cria o usuario administrador padrao e dados iniciais de marcas, modelos e veiculos.
@@ -119,22 +115,22 @@ password: aivacol123
 Desenvolvimento local:
 
 ```bash
-pnpm run start:dev
+npm run start:dev
 ```
 
 Producao local:
 
 ```bash
-pnpm run build
-pnpm run start:prod
+npm run build
+npm run start:prod
 ```
 
 ## Testes
 
 ```bash
-pnpm run test
-pnpm run test:e2e
-pnpm run test:cov
+npm run test
+npm run test:e2e
+npm run test:cov
 ```
 
 ## Autenticacao
