@@ -4,7 +4,7 @@ WORKDIR /app
 
 RUN corepack enable
 
-COPY package.json package-lock.yaml ./
+COPY package.json package-lock.json ./
 RUN npm install --frozen-lockfile
 
 FROM node:22-alpine AS builder
@@ -25,7 +25,7 @@ ENV NODE_ENV=production
 
 RUN corepack enable
 
-COPY package.json package-lock.yaml ./
+COPY package.json package-lock.json ./
 RUN npm install --prod --frozen-lockfile
 
 COPY --from=builder /app/dist ./dist
