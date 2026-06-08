@@ -1,0 +1,26 @@
+[
+  {
+    "licensePlate": "abc1d23",
+    "chassis": "9BWZZZ377VT004251",
+    "renavam": "12345678901",
+    "year": 2022,
+    "brand": "Toyota",
+    "model": "Corolla"
+  },
+  {
+    "licensePlate": "def4g56",
+    "chassis": "8AFZZZ54ATJ123456",
+    "renavam": "23456789012",
+    "year": 2021,
+    "brand": "Volkswagen",
+    "model": "Gol"
+  },
+  {
+    "licensePlate": "ghi7j89",
+    "chassis": "9BGKS48U0KG123456",
+    "renavam": "34567890123",
+    "year": 2023,
+    "brand": "Chevrolet",
+    "model": "Onix"
+  }
+]
