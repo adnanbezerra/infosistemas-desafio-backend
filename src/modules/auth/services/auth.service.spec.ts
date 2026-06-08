@@ -2,6 +2,7 @@ import { UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { hash } from 'bcrypt';
 import { AuthService } from './auth.service';
+import { MessagingService } from '../../../messaging/messaging.service';
 import { UsersService } from '../../users/services/users.service';
 import { User } from '../../users/entities/user.entity';
 
@@ -9,6 +10,7 @@ describe('AuthService', () => {
     let authService: AuthService;
     let usersService: jest.Mocked<Pick<UsersService, 'findByNickname'>>;
     let jwtService: jest.Mocked<Pick<JwtService, 'signAsync'>>;
+    let messagingService: jest.Mocked<Pick<MessagingService, 'publish'>>;
 
     beforeEach(() => {
         usersService = {
@@ -17,10 +19,14 @@ describe('AuthService', () => {
         jwtService = {
             signAsync: jest.fn().mockResolvedValue('jwt-token'),
         };
+        messagingService = {
+            publish: jest.fn().mockResolvedValue(undefined),
+        };
 
         authService = new AuthService(
             usersService as unknown as UsersService,
             jwtService as unknown as JwtService,
+            messagingService as unknown as MessagingService,
         );
     });
 
@@ -49,6 +55,11 @@ describe('AuthService', () => {
             sub: 'user-id',
             nickname: 'aivacol',
             name: 'Aivacol Admin',
+            email: 'aivacol@example.com',
+        });
+        expect(messagingService.publish).toHaveBeenCalledWith('auth.login', {
+            userId: 'user-id',
+            nickname: 'aivacol',
             email: 'aivacol@example.com',
         });
     });

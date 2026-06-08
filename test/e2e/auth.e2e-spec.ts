@@ -3,6 +3,7 @@ import request from 'supertest';
 import { LoginCommand } from '../../src/modules/auth/commands/login.command';
 import { AuthController } from '../../src/modules/auth/controllers/auth.controller';
 import { AuthService } from '../../src/modules/auth/services/auth.service';
+import { MessagingService } from '../../src/messaging/messaging.service';
 import { createE2eApp } from './helpers/e2e-app';
 import { authenticatedUser, authToken } from './helpers/fixtures';
 
@@ -23,6 +24,7 @@ describe('Auth routes (e2e)', () => {
             providers: [
                 LoginCommand,
                 { provide: AuthService, useValue: authService },
+                { provide: MessagingService, useValue: { publish: jest.fn() } },
             ],
         });
     });

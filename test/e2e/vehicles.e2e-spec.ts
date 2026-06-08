@@ -5,6 +5,7 @@ import { DeleteVehicleCommand } from '../../src/modules/vehicles/commands/delete
 import { UpdateVehicleCommand } from '../../src/modules/vehicles/commands/update-vehicle.command';
 import { VehiclesController } from '../../src/modules/vehicles/controllers/vehicles.controller';
 import { VehiclesService } from '../../src/modules/vehicles/services/vehicles.service';
+import { MessagingService } from '../../src/messaging/messaging.service';
 import { createE2eApp } from './helpers/e2e-app';
 import {
     authenticatedUser,
@@ -23,6 +24,7 @@ describe('Vehicle routes (e2e)', () => {
             'create' | 'findAll' | 'findOne' | 'update' | 'remove'
         >
     >;
+    let messagingService: jest.Mocked<Pick<MessagingService, 'publish'>>;
 
     beforeEach(async () => {
         vehiclesService = {
@@ -36,6 +38,9 @@ describe('Vehicle routes (e2e)', () => {
                 .mockResolvedValue({ ...vehicleResponse, year: 2025 }),
             remove: jest.fn().mockResolvedValue(undefined),
         };
+        messagingService = {
+            publish: jest.fn().mockResolvedValue(undefined),
+        };
 
         app = await createE2eApp({
             controllers: [VehiclesController],
@@ -44,6 +49,7 @@ describe('Vehicle routes (e2e)', () => {
                 UpdateVehicleCommand,
                 DeleteVehicleCommand,
                 { provide: VehiclesService, useValue: vehiclesService },
+                { provide: MessagingService, useValue: messagingService },
             ],
         });
     });
@@ -108,6 +114,14 @@ describe('Vehicle routes (e2e)', () => {
             });
 
         expect(vehiclesService.findAll).toHaveBeenCalledWith(query);
+        expect(messagingService.publish).toHaveBeenCalledWith(
+            'vehicles.find_all',
+            {
+                userId: authenticatedUser.id,
+                nickname: authenticatedUser.nickname,
+                query,
+            },
+        );
     });
 
     it('GET /vehicles/:id delegates to service', async () => {
