@@ -13,4 +13,8 @@ export class UsersService {
     findByNickname(nickname: string): Promise<User | null> {
         return this.usersRepository.findOne({ where: { nickname } });
     }
+
+    findById(id: string): Promise<User | null> {
+        return this.usersRepository.findOne({ where: { id } });
+    }
 }
