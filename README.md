@@ -1,98 +1,244 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Desafio Backend Aivacol
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+API NestJS para gerenciamento de frota com marcas, modelos, veiculos, usuario administrador, SQL Server, Redis e TypeORM.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Tecnologias
 
-## Description
+- Node.js
+- NestJS
+- TypeScript
+- TypeORM
+- SQL Server
+- Redis
+- Docker Compose
+- Jest
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Pre-requisitos
 
-## Project setup
+- Node.js 22+
+- pnpm
+- Docker e Docker Compose
+
+## Configuracao
+
+Copie o exemplo de ambiente:
 
 ```bash
-$ pnpm install
+cp .env.example .env
 ```
 
-## Compile and run the project
+Valores locais padrao:
+
+```env
+PORT=3000
+DB_HOST=localhost
+DB_PORT=1433
+DB_USERNAME=sa
+DB_PASSWORD=YourStrong!Passw0rd
+DB_DATABASE=aivacol_fleet
+DB_SYNCHRONIZE=false
+DB_LOGGING=true
+JWT_SECRET=change-me
+JWT_EXPIRES_IN=1d
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_TTL_SECONDS=60
+DEFAULT_ADMIN_NICKNAME=aivacol
+DEFAULT_ADMIN_PASSWORD=aivacol123
+```
+
+Nao use `DB_SYNCHRONIZE=true`. O schema deve ser criado por migrations.
+
+## Docker Compose
+
+Subir SQL Server, criar database local e subir Redis:
 
 ```bash
-# development
-$ pnpm run start
-
-# watch mode
-$ pnpm run start:dev
-
-# production mode
-$ pnpm run start:prod
+docker compose up -d mssql mssql-init redis
 ```
 
-## Run tests
+Subir tambem a API pelo Compose:
 
 ```bash
-# unit tests
-$ pnpm run test
-
-# e2e tests
-$ pnpm run test:e2e
-
-# test coverage
-$ pnpm run test:cov
+docker compose up -d
 ```
 
-## Deployment
+Servicos expostos:
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+- API: `http://localhost:3000`
+- SQL Server: `localhost:1433`
+- Redis: `localhost:6379`
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+O servico `mssql-init` aguarda SQL Server aceitar conexao e cria o database `aivacol_fleet` se ele ainda nao existir.
+
+## Instalacao
 
 ```bash
-$ pnpm install -g @nestjs/mau
-$ mau deploy
+pnpm install
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+## Migrations
 
-## Resources
+Gerar migration a partir das entities:
 
-Check out a few resources that may come in handy when working with NestJS:
+```bash
+pnpm run migration:generate src/database/migrations/NomeDaMigration
+```
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+Executar migrations:
 
-## Support
+```bash
+pnpm run migration:run
+```
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+Reverter ultima migration:
 
-## Stay in touch
+```bash
+pnpm run migration:revert
+```
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+Migrations nao devem ser escritas manualmente.
 
-## License
+## Seed
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+```bash
+pnpm run seed
+```
+
+O seed cria o usuario administrador padrao e dados iniciais de marcas, modelos e veiculos.
+
+Credenciais padrao:
+
+```text
+nickname: aivacol
+password: aivacol123
+```
+
+## Execucao
+
+Desenvolvimento local:
+
+```bash
+pnpm run start:dev
+```
+
+Producao local:
+
+```bash
+pnpm run build
+pnpm run start:prod
+```
+
+## Testes
+
+```bash
+pnpm run test
+pnpm run test:e2e
+pnpm run test:cov
+```
+
+## Autenticacao
+
+Login:
+
+```bash
+curl -X POST http://localhost:3000/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"nickname":"aivacol","password":"aivacol123"}'
+```
+
+Resposta esperada:
+
+```json
+{
+  "access_token": "jwt-token",
+  "user": {
+    "id": "uuid",
+    "nickname": "aivacol",
+    "name": "Aivacol Admin",
+    "email": "aivacol@example.com"
+  }
+}
+```
+
+Use o token nas rotas privadas:
+
+```bash
+Authorization: Bearer jwt-token
+```
+
+## Exemplos de requests
+
+Criar marca:
+
+```bash
+curl -X POST http://localhost:3000/brands \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer jwt-token" \
+  -d '{"name":"Toyota"}'
+```
+
+Criar modelo:
+
+```bash
+curl -X POST http://localhost:3000/models \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer jwt-token" \
+  -d '{"name":"Corolla","brandId":"brand-uuid"}'
+```
+
+Criar veiculo:
+
+```bash
+curl -X POST http://localhost:3000/vehicles \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer jwt-token" \
+  -d '{"licensePlate":"ABC1D23","chassis":"9BWZZZ377VT004251","renavam":"12345678901","year":2024,"modelId":"model-uuid"}'
+```
+
+Listar veiculos:
+
+```bash
+curl http://localhost:3000/vehicles \
+  -H "Authorization: Bearer jwt-token"
+```
+
+Atualizar veiculo:
+
+```bash
+curl -X PATCH http://localhost:3000/vehicles/vehicle-uuid \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer jwt-token" \
+  -d '{"year":2025}'
+```
+
+Remover veiculo:
+
+```bash
+curl -X DELETE http://localhost:3000/vehicles/vehicle-uuid \
+  -H "Authorization: Bearer jwt-token"
+```
+
+## Cache Redis
+
+A listagem de veiculos deve usar Redis real. Escritas em veiculos devem invalidar o cache para evitar resposta antiga apos criar, atualizar ou remover registros.
+
+O TTL local e definido por:
+
+```env
+REDIS_TTL_SECONDS=60
+```
+
+## Decisoes arquiteturais
+
+- `synchronize` fica sempre desativado.
+- SQL Server e Redis rodam no Compose do projeto para evitar dependencia de servicos externos no desenvolvimento.
+- `created_by` deve vir do usuario autenticado no JWT, nunca do body.
+- Rotas publicas previstas: `POST /auth/login` e `GET /health`.
+- Remocao de veiculos deve ser documentada conforme implementacao final: hard delete ou soft delete.
+
+## Bonus
+
+- Docker Compose com SQL Server, init de database, Redis e API.
+- Seed idempotente para administrador e dados iniciais.
+- Cache Redis previsto para listagem de veiculos.
