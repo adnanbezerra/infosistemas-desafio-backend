@@ -221,7 +221,7 @@ curl -X DELETE http://localhost:3000/vehicles/vehicle-uuid \
 
 ## Cache Redis
 
-A listagem de veiculos deve usar Redis real. Escritas em veiculos devem invalidar o cache para evitar resposta antiga apos criar, atualizar ou remover registros.
+A listagem e consulta por id de veiculos usam Redis real. Escritas em veiculos invalidam as chaves `vehicles:*` para evitar resposta antiga apos criar, atualizar ou remover registros.
 
 O TTL local e definido por:
 
@@ -235,10 +235,10 @@ REDIS_TTL_SECONDS=60
 - SQL Server e Redis rodam no Compose do projeto para evitar dependencia de servicos externos no desenvolvimento.
 - `created_by` deve vir do usuario autenticado no JWT, nunca do body.
 - Rotas publicas previstas: `POST /auth/login` e `GET /health`.
-- Remocao de veiculos deve ser documentada conforme implementacao final: hard delete ou soft delete.
+- Remocao de marcas, modelos e veiculos usa hard delete. Marcas com modelos e modelos com veiculos associados nao podem ser removidos.
 
 ## Bonus
 
 - Docker Compose com SQL Server, init de database, Redis e API.
 - Seed idempotente para administrador e dados iniciais.
-- Cache Redis previsto para listagem de veiculos.
+- Cache Redis para listagem e consulta por id de veiculos, com invalidacao em escritas.
